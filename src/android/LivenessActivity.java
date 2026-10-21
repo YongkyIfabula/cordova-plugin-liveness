@@ -16,6 +16,7 @@ import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
+import cordova.plugin.liveness.LivenessPlugin;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mlkit.vision.common.InputImage;
@@ -68,9 +69,9 @@ public class LivenessActivity extends AppCompatActivity {
 
     private void setupTaskQueue() {
         Intent intent = getIntent();
-        if (intent.getBooleanExtra("TASK_BLINK", false)) taskQueue.add("BLINK");
         if (intent.getBooleanExtra("TASK_NOD", false)) taskQueue.add("NOD");
         if (intent.getBooleanExtra("TASK_SHAKE", false)) taskQueue.add("SHAKE");
+        if (intent.getBooleanExtra("TASK_BLINK", false)) taskQueue.add("BLINK");
         if (intent.getBooleanExtra("TASK_SMILE", false)) taskQueue.add("SMILE");
 
         updateInstructionText();
@@ -148,14 +149,14 @@ public class LivenessActivity extends AppCompatActivity {
             boolean isTaskPassed = false;
 
             switch (currentTask) {
-                case "BLINK":
-                    isTaskPassed = eval.getBoolean("isBlinking");
-                    break;
                 case "NOD":
                     isTaskPassed = eval.getBoolean("isNodding");
                     break;
                 case "SHAKE":
                     isTaskPassed = eval.getBoolean("isShaking");
+                    break;
+                case "BLINK":
+                    isTaskPassed = eval.getBoolean("isBlinking");
                     break;
                 case "SMILE":
                     isTaskPassed = eval.getBoolean("isSmiling");
@@ -183,9 +184,9 @@ public class LivenessActivity extends AppCompatActivity {
 
         String nextTask = taskQueue.get(currentTaskIndex);
         switch (nextTask) {
-            case "BLINK": tvInstruction.setText("Silakan Kedipkan Mata Anda"); break;
             case "NOD":   tvInstruction.setText("Ngangguk (Gerakkan Kepala Atas-Bawah)"); break;
             case "SHAKE": tvInstruction.setText("Geleng (Gerakkan Kepala Kiri-Kanan)"); break;
+            case "BLINK": tvInstruction.setText("Silakan Kedipkan Mata Anda"); break;
             case "SMILE": tvInstruction.setText("Silakan Tersenyum Lebar"); break;
         }
     }

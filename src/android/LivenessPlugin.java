@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.LivenessActivity;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -61,12 +62,12 @@ public class LivenessPlugin extends CordovaPlugin {
         if (ACTION_START_LIVENESS.equals(action)) {
             this.livenessCallbackContext = callbackContext;
 
-            boolean checkBlink = args.optBoolean(0, false);
-            boolean checkNod   = args.optBoolean(1, false);
-            boolean checkShake = args.optBoolean(2, false);
+            boolean checkNod   = args.optBoolean(0, false);
+            boolean checkShake = args.optBoolean(1, false);
+            boolean checkBlink = args.optBoolean(2, false);
             boolean checkSmile = args.optBoolean(3, false);
 
-            startLivenessCameraFlow(checkBlink, checkNod, checkShake, checkSmile);
+            startLivenessCameraFlow(checkNod, checkShake, checkBlink, checkSmile);
             
             // --- TAMBAHAN WAJIB 2 ---
             // Tahan jembatan JS agar tidak putus saat menunggu kamera selesai
@@ -99,13 +100,13 @@ public class LivenessPlugin extends CordovaPlugin {
     /**
      * Memulai Layar Kamera (UI) dengan parameter yang diminta
      */
-    private void startLivenessCameraFlow(boolean checkBlink, boolean checkNod, boolean checkShake, boolean checkSmile) {
+    private void startLivenessCameraFlow(boolean checkNod, boolean checkShake, boolean checkBlink, boolean checkSmile) {
         // 1. Mandor menyiapkan surat tugas untuk Pekerja Lapangan (LivenessActivity)
         Intent intent = new Intent(cordova.getActivity(), LivenessActivity.class);
         
-        intent.putExtra("TASK_BLINK", checkBlink);
         intent.putExtra("TASK_NOD", checkNod);
         intent.putExtra("TASK_SHAKE", checkShake);
+        intent.putExtra("TASK_BLINK", checkBlink);
         intent.putExtra("TASK_SMILE", checkSmile);
 
         // 2. Buka layar LivenessActivity dan tunggu hasilnya!
@@ -176,9 +177,9 @@ public class LivenessPlugin extends CordovaPlugin {
         boolean isShaking = (headEulerY > 20.0f || headEulerY < -20.0f);
         boolean isNodding = (headEulerX > 15.0f || headEulerX < -15.0f);
 
-        data.put("isBlinking", isBlinking);
         data.put("isSmiling", isSmiling);
         data.put("isShaking", isShaking);
+        data.put("isBlinking", isBlinking);
         data.put("isNodding", isNodding);
 
         return data;
