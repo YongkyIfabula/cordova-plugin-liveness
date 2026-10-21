@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-plugin-liveness" version="1.0.0" 
+        xmlns="http://apache.org/cordova/ns/plugins/1.0" 
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <name>LivenessPlugin</name>
+    <description>Plugin Liveness Detection untuk OutSystems</description>
+
+    <!-- 1. Menghubungkan Antarmuka JavaScript -->
+    <js-module name="LivenessPlugin" src="www/LivenessPlugin.js">
+        <clobbers target="cordova.plugins.LivenessPlugin" />
+    </js-module>
+
+    <!-- 2. Konfigurasi Khusus Platform Android -->
+    <platform name="android">
+        
+        <!-- Mendaftarkan Plugin ke dalam sistem Cordova Android -->
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="LivenessPlugin">
+                <param name="android-package" value="cordova.plugin.liveness.LivenessPlugin" />
+            </feature>
+        </config-file>
+
+        <!-- Meminta Izin Akses Kamera di AndroidManifest.xml -->
+        <config-file parent="/*" target="AndroidManifest.xml">
+            <uses-permission android:name="android.permission.CAMERA" />
+        </config-file>
+
+        <!-- Menentukan letak file Java Native yang akan dibuat -->
+        <source-file src="src/android/LivenessPlugin.java" target-dir="src/cordova/plugin/liveness" />
+
+        <!-- 1. Mendaftarkan Layar Kamera Baru ke Android Manifest -->
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <activity android:name="cordova.plugin.liveness.LivenessActivity"
+                    android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+                    android:screenOrientation="portrait" />
+        </config-file>
+
+        <!-- 2. Memberi tahu Cordova untuk meng-copy file Activity Kamera (yang akan kita buat nanti) -->
+        <source-file src="src/android/LivenessActivity.java" target-dir="src/cordova/plugin/liveness" />
+
+        <!-- 3. Memberi tahu Cordova untuk meng-copy file Desain UI XML (yang akan kita buat nanti) -->
+        <source-file src="src/android/activity_liveness.xml" target-dir="res/layout" />
+
+        <!-- 4. Inject Google ML Kit Face Detection (Library Utama - Otak) -->
+        <framework src="com.google.mlkit:face-detection:16.1.6" />
+
+        <!-- 5. Inject AndroidX CameraX (Library Kamera - Mata) -->
+        <framework src="androidx.camera:camera-core:1.3.1" />
+        <framework src="androidx.camera:camera-camera2:1.3.1" />
+        <framework src="androidx.camera:camera-lifecycle:1.3.1" />
+        <framework src="androidx.camera:camera-view:1.3.1" />
+        
+    </platform>
+</plugin>
