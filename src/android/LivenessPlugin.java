@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.LivenessActivity;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -43,6 +44,13 @@ public class LivenessPlugin extends CordovaPlugin {
             
             if (!PermissionHelper.hasPermission(this, Manifest.permission.CAMERA)) {
                 PermissionHelper.requestPermission(this, CAMERA_REQUEST_CODE, Manifest.permission.CAMERA);
+                
+                // --- TAMBAHAN WAJIB 1 ---
+                // Tahan jembatan JS agar tidak putus saat menunggu pop-up izin
+                PluginResult r = new PluginResult(PluginResult.Status.NO_RESULT);
+                r.setKeepCallback(true);
+                callbackContext.sendPluginResult(r);
+                
             } else {
                 initMLKitDetector();
                 initCallbackContext.success("INITIALIZED_SUCCESS");
@@ -54,13 +62,19 @@ public class LivenessPlugin extends CordovaPlugin {
         if (ACTION_START_LIVENESS.equals(action)) {
             this.livenessCallbackContext = callbackContext;
 
-            // Membaca 4 Parameter dari OutSystems (true / false)
             boolean checkBlink = args.optBoolean(0, false);
             boolean checkNod   = args.optBoolean(1, false);
             boolean checkShake = args.optBoolean(2, false);
             boolean checkSmile = args.optBoolean(3, false);
 
             startLivenessCameraFlow(checkBlink, checkNod, checkShake, checkSmile);
+            
+            // --- TAMBAHAN WAJIB 2 ---
+            // Tahan jembatan JS agar tidak putus saat menunggu kamera selesai
+            PluginResult r = new PluginResult(PluginResult.Status.NO_RESULT);
+            r.setKeepCallback(true);
+            callbackContext.sendPluginResult(r);
+            
             return true;
         }
 
@@ -114,7 +128,11 @@ public class LivenessPlugin extends CordovaPlugin {
                         JSONObject result = new JSONObject();
                         result.put("isSuccess", data.getBooleanExtra("isSuccess", false));
                         result.put("message", data.getStringExtra("message"));
-                        livenessCallbackContext.success(result);
+                        
+                        // --- UBAH BAGIAN INI ---
+                        // Tambahkan .toString() agar OutSystems menerimanya sebagai teks JSON murni
+                        livenessCallbackContext.success(result.toString());
+                        
                     } catch (JSONException e) {
                         livenessCallbackContext.error("JSON Error saat merangkai respon.");
                     }
