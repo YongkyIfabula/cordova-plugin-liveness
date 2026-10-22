@@ -9,7 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
+import android.LivenessActivity;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -67,7 +67,12 @@ public class LivenessPlugin extends CordovaPlugin {
             boolean checkBlink = args.optBoolean(2, false);
             boolean checkSmile = args.optBoolean(3, false);
 
-            startLivenessCameraFlow(checkNod, checkShake, checkBlink, checkSmile);
+            int orderNod   = args.optInt(4, 1);
+            int orderShake = args.optInt(5, 2);
+            int orderBlink = args.optInt(6, 3);
+            int orderSmile = args.optInt(7, 4);
+
+            startLivenessCameraFlow(checkNod, checkShake, checkBlink, checkSmile, orderNod, orderShake, orderBlink, orderSmile);
             
             // --- TAMBAHAN WAJIB 2 ---
             // Tahan jembatan JS agar tidak putus saat menunggu kamera selesai
@@ -100,7 +105,7 @@ public class LivenessPlugin extends CordovaPlugin {
     /**
      * Memulai Layar Kamera (UI) dengan parameter yang diminta
      */
-    private void startLivenessCameraFlow(boolean checkNod, boolean checkShake, boolean checkBlink, boolean checkSmile) {
+    private void startLivenessCameraFlow(boolean checkBlink, boolean checkNod, boolean checkShake, boolean checkSmile, int orderNod, int orderShake, int orderBlink, int orderSmile) {
         // 1. Mandor menyiapkan surat tugas untuk Pekerja Lapangan (LivenessActivity)
         Intent intent = new Intent(cordova.getActivity(), LivenessActivity.class);
         
@@ -108,6 +113,12 @@ public class LivenessPlugin extends CordovaPlugin {
         intent.putExtra("TASK_SHAKE", checkShake);
         intent.putExtra("TASK_BLINK", checkBlink);
         intent.putExtra("TASK_SMILE", checkSmile);
+
+        // Surat Tugas Urutan
+        intent.putExtra("ORDER_NOD", orderNod);
+        intent.putExtra("ORDER_SHAKE", orderShake);
+        intent.putExtra("ORDER_BLINK", orderBlink);
+        intent.putExtra("ORDER_SMILE", orderSmile);
 
         // 2. Buka layar LivenessActivity dan tunggu hasilnya!
         cordova.setActivityResultCallback(this);

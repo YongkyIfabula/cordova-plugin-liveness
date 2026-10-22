@@ -31,6 +31,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
+import java.util.Collections;
 
 public class LivenessActivity extends AppCompatActivity {
 
@@ -85,10 +86,33 @@ public class LivenessActivity extends AppCompatActivity {
 
     private void setupTaskQueue() {
         Intent intent = getIntent();
-        if (intent.getBooleanExtra("TASK_NOD", false)) taskQueue.add("NOD");
-        if (intent.getBooleanExtra("TASK_SHAKE", false)) taskQueue.add("SHAKE");
-        if (intent.getBooleanExtra("TASK_BLINK", false)) taskQueue.add("BLINK");
-        if (intent.getBooleanExtra("TASK_SMILE", false)) taskQueue.add("SMILE");
+        taskQueue.clear();
+        
+        // Buat daftar sementara untuk menampung tugas yang aktif
+        ArrayList<TaskOrder> activeTasks = new ArrayList<>();
+
+        // Hanya masukkan ke daftar JIKA nilainya TRUE
+
+        if (intent.getBooleanExtra("TASK_NOD", false)) {
+            activeTasks.add(new TaskOrder("NOD", intent.getIntExtra("ORDER_NOD", 1)));
+        }
+        if (intent.getBooleanExtra("TASK_SHAKE", false)) {
+            activeTasks.add(new TaskOrder("SHAKE", intent.getIntExtra("ORDER_SHAKE", 2)));
+        }
+        if (intent.getBooleanExtra("TASK_BLINK", false)) {
+            activeTasks.add(new TaskOrder("BLINK", intent.getIntExtra("ORDER_BLINK", 3)));
+        }
+        if (intent.getBooleanExtra("TASK_SMILE", false)) {
+            activeTasks.add(new TaskOrder("SMILE", intent.getIntExtra("ORDER_SMILE", 4)));
+        }
+
+        // Jalankan perintah Sorting (Mengurutkan berdasarkan angka orderIndex)
+        Collections.sort(activeTasks);
+
+        // Setelah terurut rapi, masukkan ke Antrean Kerja sesungguhnya (taskQueue)
+        for (TaskOrder task : activeTasks) {
+            taskQueue.add(task.taskName);
+        }
 
         updateInstructionText();
     }
@@ -231,4 +255,21 @@ public class LivenessActivity extends AppCompatActivity {
         setResult(RESULT_OK, resultIntent);
         finish(); // Tutup layar kamera ini dan kembali ke OutSystems
     }
+
+    private class TaskOrder implements Comparable<TaskOrder> {
+        String taskName;
+        int orderIndex;
+
+        TaskOrder(String taskName, int orderIndex) {
+            this.taskName = taskName;
+            this.orderIndex = orderIndex;
+        }
+
+        @Override
+        public int compareTo(TaskOrder other) {
+            // Mengurutkan dari angka kecil ke besar (Ascending)
+            return Integer.compare(this.orderIndex, other.orderIndex);
+        }
+    }
+
 }
