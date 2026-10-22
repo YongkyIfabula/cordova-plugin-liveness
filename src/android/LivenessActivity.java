@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraSelector;
@@ -42,6 +43,9 @@ public class LivenessActivity extends AppCompatActivity {
     private int currentTaskIndex = 0;
     private boolean isProcessing = false;
 
+    private android.view.View vOvalBorder;
+    private android.graphics.drawable.GradientDrawable ovalDrawable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +60,18 @@ public class LivenessActivity extends AppCompatActivity {
         
         previewView = findViewById(previewViewId);
         tvInstruction = findViewById(tvInstructionId);
+
+        int vOvalBorderId = getResources().getIdentifier("vOvalBorder", "id", getPackageName());
+        vOvalBorder = findViewById(vOvalBorderId);
+
+        // Membuat desain Oval secara programatik
+        ovalDrawable = new android.graphics.drawable.GradientDrawable();
+        ovalDrawable.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        ovalDrawable.setColor(android.graphics.Color.TRANSPARENT); // Tengahnya bolong agar wajah terlihat
+        // Warna default: Abu-abu keputihan agak transparan (bisa diganti TRANSPARENT jika ingin hilang)
+        ovalDrawable.setStroke(10, android.graphics.Color.parseColor("#B3FFFFFF")); 
+        vOvalBorder.setBackground(ovalDrawable);
+        // -------------------------
 
         // 1. Baca antrean tugas dari OutSystems
         setupTaskQueue();
@@ -164,9 +180,25 @@ public class LivenessActivity extends AppCompatActivity {
             }
 
             if (isTaskPassed) {
-                // Berhasil melewati 1 tugas, lanjut ke antrean berikutnya
+                // 1. Kunci kamera sebentar agar tidak langsung lompat ke tugas berikutnya
+                isProcessing = true;
+
+                // 2. Ubah border menjadi HIJAU TEBAL
+                ovalDrawable.setStroke(15, android.graphics.Color.parseColor("#4CAF50")); 
+
+                // 3. Lanjut ke tugas berikutnya dan update teks
                 currentTaskIndex++;
                 updateInstructionText();
+
+                // 4. Beri jeda 1.5 detik agar user bisa melihat border hijau, 
+                // lalu kembalikan ke warna awal dan buka kunci kamera
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                    if (currentTaskIndex < taskQueue.size()) {
+                        // Kembalikan ke warna tidak berwarna/netral
+                        ovalDrawable.setStroke(10, android.graphics.Color.parseColor("#B3FFFFFF")); 
+                        isProcessing = false; // Buka kunci agar kamera mendeteksi tugas baru
+                    }
+                }, 1500);
             }
 
         } catch (JSONException e) {
